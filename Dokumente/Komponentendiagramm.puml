@@ -1,0 +1,89 @@
+@startuml UML_Komponentendiagramm_Sollkonzept
+!theme plain
+title CLI Tool Architektur - Komponentendiagramm (UML Standard)
+
+left to right direction
+skinparam componentStyle uml2
+skinparam linetype polyline
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam nodesep 90
+skinparam ranksep 110
+skinparam ArrowFontSize 11
+skinparam ComponentFontSize 13
+skinparam PackageFontSize 14
+
+actor "Nutzer" as User
+
+package "Presentation Layer" {
+    component "Prompt Service\n@clack/prompts" as Prompt
+    component "CLI Kernel\noclif" as CLI
+}
+
+package "Business Logic Layer" {
+    component "Config Manager\nProjectConfig" as Config
+    component "Project Generator\nOrchestrator" as Generator
+    component "Template Engine\nEJS" as Template
+}
+
+package "Infrastructure Layer" {
+    component "File System\nfs/promises" as FS
+    component "Automation Module\nexeca" as Auto
+}
+
+artifact "Generated Project" as ProjectArtifact
+
+interface "User Prompts" as IUserPrompts
+interface "Configuration" as IConfiguration
+interface "Template Rendering" as ITemplate
+interface "File Operations" as IFileOps
+interface "Automation Tasks" as IAutomation
+
+' Layout-Hilfen
+Prompt -[hidden]right-> CLI
+CLI -[hidden]right-> Config
+Config -[hidden]down-> Generator
+Generator -[hidden]right-> Template
+Template -[hidden]down-> FS
+FS -[hidden]down-> Auto
+ProjectArtifact -[hidden]right-> IFileOps
+
+User --> Prompt : Interaktion
+Prompt ..> CLI : Eingaben
+
+Prompt - IUserPrompts
+CLI ..> IUserPrompts : nutzt
+
+CLI ..> Config : Konfiguration
+Config - IConfiguration
+Generator ..> IConfiguration : nutzt
+
+Generator ..> Template : Templates
+Template - ITemplate
+
+Generator ..> FS : Dateien
+Template ..> IFileOps : Ausgabe
+FS - IFileOps
+
+Generator ..> Auto : Setup
+Auto - IAutomation
+
+FS --> ProjectArtifact : schreibt
+Auto --> ProjectArtifact : initialisiert
+
+note bottom of Generator
+Koordiniert die Generierung
+und delegiert an Infrastrukturmodule.
+end note
+
+legend bottom
+== UML-Notation ==
+component: Modul/Systembaustein
+interface: angebotene Schnittstelle
+artifact: erzeugtes Ergebnis
+..>: Abhaengigkeit
+-->: Beziehung/Ablauf
+endlegend
+
+@enduml
