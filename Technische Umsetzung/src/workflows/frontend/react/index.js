@@ -1,0 +1,20 @@
+import { StepRegistry } from "../../../core/step-registry.js";
+import { checkTargetDirStep } from "./steps/check-target-dir.step.js";
+import { createFrontendDirStep } from "./steps/create-frontend-dir.step.js";
+import { createReactProjectStep } from "./steps/create-react-project.step.js";
+import { installFrontendDepsStep } from "./steps/install-frontend-deps.step.js";
+import { writeFrontendEnvStep } from "./steps/write-frontend-env.step.js";
+import { prepareFrontendContainerStep } from "./steps/prepare-frontend-container.step.js";
+import { markFrontendReadyStep } from "./steps/mark-frontend-ready.step.js";
+
+export function createReactStepRegistry() {
+  return new StepRegistry([
+    checkTargetDirStep,
+    createFrontendDirStep,
+    createReactProjectStep,
+    installFrontendDepsStep,
+    writeFrontendEnvStep,
+    prepareFrontendContainerStep,
+    markFrontendReadyStep,
+  ]);
+}

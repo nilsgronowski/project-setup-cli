@@ -1,0 +1,19 @@
+{
+  "name": "project-setup-cli",
+  "version": "0.1.0",
+  "description": "Automates reproducible project stack setup with resume support and Docker/Compose generation.",
+  "main": "cli.ts",
+  "type": "module",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Nils Gronowski",
+  "license": "ISC",
+  "dependencies": {
+    "@clack/prompts": "^1.1.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0"
+  }
+}
