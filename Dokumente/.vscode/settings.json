@@ -1,5 +1,0 @@
-{
-  "java.home": "/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home",
-  "plantuml.exportFormat": "png",
-  "plantuml.commandArgs": ["-DGRAPHVIZ_DOT=/opt/homebrew/bin/dot"]
-}
