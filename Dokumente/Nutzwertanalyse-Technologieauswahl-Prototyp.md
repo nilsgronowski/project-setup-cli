@@ -236,4 +236,35 @@ Um diese Auswahl umzusetzen, sollte das CLI folgende Module enthalten:
 
 ---
 
+## Gesamtuebersicht aller Bewertungen
+
+| Kategorie       | Option         | Gesamt | Empfohlen |
+| --------------- | -------------- | -----: | :-------: |
+| Frontend        | React          |    460 |     ✓     |
+| Frontend        | Vue            |    430 |     ✓     |
+| Frontend        | Angular        |    390 |           |
+| Frontend        | Svelte         |    390 |           |
+| Frontend        | Next.js        |    390 |           |
+| Frontend        | SolidJS        |    315 |           |
+| Backend         | Express        |    440 |     ✓     |
+| Backend         | Django         |    430 |     ✓     |
+| Backend         | Fastify        |    420 |           |
+| Backend         | FastAPI        |    420 |           |
+| Backend         | NestJS         |    405 |           |
+| Backend         | Spring Boot    |    340 |           |
+| SQL-Datenbank   | PostgreSQL     |    455 |     ✓     |
+| SQL-Datenbank   | MySQL          |    435 |           |
+| SQL-Datenbank   | MariaDB        |    420 |           |
+| SQL-Datenbank   | SQLite         |    380 |           |
+| SQL-Datenbank   | MS SQL Server  |    380 |           |
+| SQL-Datenbank   | CockroachDB    |    340 |           |
+| NoSQL-Datenbank | MongoDB        |    450 |     ✓     |
+| NoSQL-Datenbank | Redis          |    400 |           |
+| NoSQL-Datenbank | DynamoDB Local |    350 |           |
+| NoSQL-Datenbank | Neo4j          |    330 |           |
+| NoSQL-Datenbank | CouchDB        |    315 |           |
+| NoSQL-Datenbank | Cassandra      |    265 |           |
+
+Maximalpunktzahl je Kategorie: 500 Punkte. Die Detailkriterien und Gewichtungen je Kategorie sind in den Abschnitten 3–6 dokumentiert.
+
 Dateiname: Nutzwertanalyse-Technologieauswahl-Prototyp.md

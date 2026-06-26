@@ -4,6 +4,16 @@
 
 Dieses Dokument erklaert, wie die aktuelle CLI aufgebaut ist, wie die Step-Engine funktioniert, warum bestimmte Designentscheidungen getroffen wurden und wie du den Code sicher erweitern kannst.
 
+## Entwurfsprinzip Erweiterbarkeit
+
+Das Erweiterbarkeitskonzept soll auf einer klaren Trennung zwischen stabiler Kernlogik und austauschbaren Workflow-Bausteinen beruhen. Als stabile Basis sind dabei vor allem die CLI-Orchestrierung, das Konfigurationsschema mit Validierung sowie die allgemeine Step-Laufzeit vorgesehen. Neue Frameworks sollen nicht durch tiefgreifende Eingriffe in diese Kernlogik eingebunden werden, sondern ueber klar abgegrenzte Erweiterungspunkte.
+
+Aus heutiger Sicht zeichnet sich dafuer ein Muster ab, das sich an der aktuellen Struktur orientiert: Neue Technologien sollen vor allem ueber eine zusaetzliche CLI-Auswahl, einen framework-spezifischen Workflow mit eigener Step-Registry, passende Generierungsschritte fuer Projektdateien und Umgebungsvariablen sowie die Einbindung in die Compose-Erzeugung aufgenommen werden. Ein vollstaendig generisches Framework-Profil oder ein separater Compose-Assembler ist in diesem Entwurf zunaechst nicht als eigene Schicht vorgesehen; stattdessen sollen framework-spezifische Details innerhalb klar abgegrenzter Registries und Steps gekapselt werden.
+
+Fuer die Erweiterung um ein weiteres Framework ist damit ein standardisierter Ablauf vorgesehen: Zunaechst sollen Auswahl und Konfiguration im CLI sowie im Schema ergaenzt werden. Danach soll ein eigener Workflow mit einer festen Schrittfolge definiert werden, typischerweise fuer Verzeichnisanlage, Scaffolding, Dependency-Installation, Env-Erzeugung, Container-Vorbereitung und Abschlussmarker. Abschliessend soll geprueft werden, ob Root-Compose, Datenbank-Anbindung und Default-Konfigurationen erweitert werden muessen.
+
+Der Vorteil dieses Vorgehens soll in Reproduzierbarkeit und Wartbarkeit liegen. Erweiterungen sollen einem einheitlichen Muster folgen, wodurch Implementierungsrisiken reduziert, Entscheidungen besser dokumentiert und neue Entwickler schneller eingearbeitet werden koennen. Erweiterbarkeit waere damit nicht nur eine technische Eigenschaft, sondern ein geplanter Beitrag zur langfristigen Entwicklungs- und Betriebsfaehigkeit der Loesung.
+
 ## Aktuelle Architektur
 
 Der Ablauf ist in vier Schichten getrennt:
@@ -25,8 +35,8 @@ Der Ablauf ist in vier Schichten getrennt:
 
 4. Workflow-Implementierungen
 
-- Dateien: src/workflows/react/index.js und src/workflows/react/steps/\*.js
-- Verantwortlich fuer konkrete Arbeitsschritte je Framework.
+- Dateien: src/workflows/frontend/_, src/workflows/backend/_ und src/workflows/database/\*
+- Verantwortlich fuer konkrete Arbeitsschritte je Technologie und fuer die jeweilige Step-Reihenfolge.
 
 ## End-to-End Ablauf
 
@@ -111,6 +121,12 @@ Ein Step braucht:
 - isDone(context): Promise<boolean>
 - run(context): Promise<void>
 
+`isDone` ist dabei nur als asynchrone Boolean-Pruefung definiert. Der Vertrag schreibt nicht vor, wie diese Pruefung intern umgesetzt sein muss. In der aktuellen Implementierung kommen mehrere Varianten vor:
+
+- reine Existenzpruefung eines Artefakts, zum Beispiel eines Verzeichnisses oder Marker-Files
+- Vergleich des aktuellen Dateiinhalts mit dem aus `config` abgeleiteten Soll-Zustand
+- semantische Zustandspruefung, zum Beispiel anhand mehrerer Dateien oder einzelner Konfigurationswerte
+
 StepContext enthaelt:
 
 - config
@@ -133,8 +149,10 @@ runSteps arbeitet sequentiell:
 - startet jeden Step in der registrierten Reihenfolge
 - skippt bei isDone === true
 - fuehrt run aus, falls noch nicht done
-- stoppt beim ersten Fehler
-- liefert strukturiertes Ergebnis mit completed/skipped/failed
+- stoppt beim ersten Fehler in `run`
+- liefert fuer Fehler in `run` ein strukturiertes Ergebnis mit completed/skipped/failed
+
+Wichtig: In der aktuellen Runner-Implementierung wird `isDone` vor dem `try/catch` ausgewertet. Wenn `isDone` selbst einen Fehler wirft, wird dieser daher nicht in das strukturierte Rueckgabeformat des Runners ueberfuehrt, sondern direkt nach oben propagiert.
 
 ## React Workflow
 
@@ -150,27 +168,32 @@ runSteps arbeitet sequentiell:
 - Datei: src/workflows/frontend/react/steps/check-target-dir.step.js
 - Zweck: Zielordner sicherstellen.
 
-2. create_react_project
+2. create_frontend_dir
+
+- Datei: src/workflows/frontend/react/steps/create-frontend-dir.step.js
+- Zweck: frontend-Unterordner anlegen.
+
+3. create_react_project
 
 - Datei: src/workflows/frontend/react/steps/create-react-project.step.js
 - Zweck: package.json fuer Vite/React erzeugen.
 
-3. install_frontend_deps
+4. install_frontend_deps
 
 - Datei: src/workflows/frontend/react/steps/install-frontend-deps.step.js
 - Zweck: Frontend-Dependencies per npm installieren.
 
-4. write_frontend_env
+5. write_frontend_env
 
 - Datei: src/workflows/frontend/react/steps/write-frontend-env.step.js
 - Zweck: .env mit PORT schreiben.
 
-5. prepare_frontend_container
+6. prepare_frontend_container
 
 - Datei: src/workflows/frontend/react/steps/prepare-frontend-container.step.js
 - Zweck: Dockerfile generieren.
 
-6. mark_frontend_ready
+7. mark_frontend_ready
 
 - Datei: src/workflows/frontend/react/steps/mark-frontend-ready.step.js
 - Zweck: .tooling/frontend-ready.json als Abschlussmarker schreiben.
@@ -273,39 +296,42 @@ runSteps arbeitet sequentiell:
 2. create_django_project_files
 
 - Datei: src/workflows/backend/django/steps/create-django-project-files.step.js
-- Zweck: Django-Projektdateien (manage.py, config/, app/, requirements.txt) erzeugen.
+- Zweck: requirements.txt und Projektdateien erzeugen, Python-Dependencies installieren sowie Django-Projekt und App scaffolden.
 
-3. install_backend_deps
-
-- Datei: src/workflows/backend/django/steps/install-backend-deps.step.js
-- Zweck: Python-Dependencies aus requirements.txt installieren.
-
-4. write_backend_env
+3. write_backend_env
 
 - Datei: src/workflows/backend/django/steps/write-backend-env.step.js
 - Zweck: backend/.env fuer Django schreiben.
 
-5. prepare_backend_container
+4. prepare_backend_container
 
 - Datei: src/workflows/backend/django/steps/prepare-backend-container.step.js
 - Zweck: Dockerfile fuer Django erzeugen.
 
-6. mark_backend_ready
+5. mark_backend_ready
 
 - Datei: src/workflows/backend/django/steps/mark-backend-ready.step.js
 - Zweck: .tooling/backend-ready.json als Abschlussmarker schreiben.
 
 ## Idempotenz-Muster
 
-Jeder Step folgt demselben Muster:
+Alle Steps folgen demselben Grundmuster:
 
-1. isDone prueft ein klares Artefakt
+1. `isDone` prueft, ob der jeweilige Schritt bereits in einem ausreichend fertigen Zustand ist
 
-- Datei existiert, Marker existiert, etc.
+- je nach Step ueber Artefakt-Existenz, Inhaltsvergleich oder eine kleine fachliche Heuristik
 
-2. run erstellt genau diese Artefakte
+2. `run` stellt genau diesen Zustand her oder aktualisiert ihn
 
 - Keine globalen Seiteneffekte ausserhalb des eigenen Schritts.
+
+Die aktuelle Codebasis ist dabei nicht vollstaendig einheitlich:
+
+- einige Steps betrachten ein vorhandenes Artefakt bereits als ausreichend
+- andere Steps vergleichen Dateiinhalt exakt mit dem erwarteten Soll-Zustand aus `config`
+- Marker-Steps sind ebenfalls uneinheitlich: der Datenbank-Marker validiert seinen Inhalt, Frontend- und Backend-Marker pruefen aktuell nur auf Existenz
+
+`isDone` ist damit im Ist-Zustand kein rein syntaktischer Datei-Check, sondern ein schrittbezogener Resume- und Idempotenz-Hook mit unterschiedlicher Strenge je nach Step.
 
 Warum das wichtig ist:
 
@@ -319,7 +345,7 @@ Warum das wichtig ist:
 3. Vue ist als Frontend-Workflow implementiert.
 4. Django ist als Backend-Workflow implementiert.
 5. Root-Compose und Datenbank-Compose werden weiterhin ueber den Datenbank-Workflow erzeugt und greifen auf frontend/backend Dockerfiles zu.
-6. Die Dependency-Installation erfolgt fuer Frontend/Express per npm und fuer Django per pip.
+6. Die Dependency-Installation erfolgt fuer Frontend und Express ueber eigene Install-Steps per npm; bei Django ist die pip-Installation aktuell im Scaffolding-Step create_django_project_files enthalten.
 
 ## Wie du sauber weiter ausbaust
 
@@ -340,9 +366,11 @@ Wenn ein Workflow nicht laeuft:
 1. Ist die Registry-Datei vorhanden und exportiert create...StepRegistry?
 2. Haben alle Steps eindeutige IDs?
 3. Liefert isDone wirklich boolean?
-4. Wirft run im Fehlerfall eine klare Error-Nachricht?
-5. Ist config nach validateConfig vollstaendig (insb. Ports)?
-6. Stimmen Importpfade in cli.js mit echten Dateien ueberein?
+4. Ist die `isDone`-Logik fuer diesen Step passend zur beabsichtigten Idempotenz: Existenzpruefung, Inhaltsvergleich oder semantische Pruefung?
+5. Wirft `run` im Fehlerfall eine klare Error-Nachricht?
+6. Kann `isDone` selbst eine Exception werfen und ist dieser Fall bedacht?
+7. Ist config nach validateConfig vollstaendig (insb. Ports)?
+8. Stimmen Importpfade in cli.js mit echten Dateien ueberein?
 
 ## Kurzfazit
 

@@ -21,6 +21,7 @@ Rahmenbedingungen:
 2. Keine Sachkosten, Lizenzkosten oder Infrastrukturkosten im Projektbudget.
 3. Kostenart: ausschliesslich Personalkosten.
 4. Ergebnis: funktionsfaehiger CLI-Prototyp mit ausgewaehlten Technologie-Workflows.
+5. Zusaetzlicher Abstimmungsaufwand mit Auftraggeber: 4 Stunden zu 90 EUR/h (separat ausgewiesen).
 
 Wesentliche Annahmen fuer die Wirtschaftlichkeitsrechnung:
 
@@ -74,6 +75,9 @@ Gesamtkosten = Projektstunden x Stundensatz
 Basisszenario:
 80h x 45 EUR/h = 3.600 EUR
 
+Erweitertes Basisszenario inkl. Abstimmung mit Auftraggeber:
+(80h x 45 EUR/h) + (4h x 90 EUR/h) = 3.960 EUR
+
 ### 4.2 Sensitivitaet nach Stundensatz
 
 | Stundensatz | Kosten bei 80h |
@@ -81,6 +85,14 @@ Basisszenario:
 |    35 EUR/h |      2.800 EUR |
 |    45 EUR/h |      3.600 EUR |
 |    70 EUR/h |      5.600 EUR |
+
+### 4.3 Kompakter Kostenplan (ohne Phasen)
+
+| Kostenposition                          | Stunden | Kostensatz |        Kosten |
+| --------------------------------------- | ------: | ---------: | ------------: |
+| Projektaufwand gesamt                   |      80 |   45 EUR/h |     3.600 EUR |
+| Auftraggeber-Abstimmung und Rueckfragen |       4 |   90 EUR/h |       360 EUR |
+| **Gesamtkosten**                        |  **84** |            | **3.960 EUR** |
 
 ## 5. Monetarer Nutzen
 
@@ -94,15 +106,17 @@ Der monetare Nutzen entsteht durch reduzierte Setup-Zeit, weniger Wiederholungsf
 
 ### 5.2 Berechnungsmodell
 
-Monetarer Jahresnutzen = (Zeitersparnis je Setup in Stunden) x (Anzahl Setups pro Monat) x 12 x (Stundensatz)
+Monatlicher Nutzen = (Zeitersparnis je Setup in Stunden) x (Anzahl Setups pro Monat) x (Stundensatz)
 
-### 5.3 Szenarien (12 Monate, 45 EUR/h)
+Jahresnutzen = Monatlicher Nutzen x 12
 
-| Szenario     | Zeitersparnis je Setup | Setups pro Monat | Jahresnutzen |
-| ------------ | ---------------------: | ---------------: | -----------: |
-| Konservativ  |                   1,0h |                4 |    2.160 EUR |
-| Realistisch  |                   2,0h |                8 |    8.640 EUR |
-| Ambitioniert |                   3,0h |               10 |   16.200 EUR |
+### 5.3 Szenarien (45 EUR/h)
+
+| Szenario     | Zeitersparnis je Setup | Setups pro Monat | Monatlicher Nutzen | Jahresnutzen |
+| ------------ | ---------------------: | ---------------: | -----------------: | -----------: |
+| Konservativ  |                   1,0h |                4 |            180 EUR |    2.160 EUR |
+| Realistisch  |                   2,0h |                8 |            720 EUR |    8.640 EUR |
+| Ambitioniert |                   3,0h |               10 |          1.350 EUR |   16.200 EUR |
 
 ## 6. Nicht-monetarer Nutzen
 
@@ -151,20 +165,36 @@ Nicht-monetare Effekte sind fuer den Prototyp besonders relevant, da sie Qualita
 2. Payback-Zeit
    Formel: Payback in Monaten = Kosten / monatlicher Nutzen
 
-### 7.2 Ergebnis je Szenario (Kosten = 3.600 EUR)
+### 7.2 Ergebnis je Szenario (Kosten = 3.960 EUR)
 
 | Szenario     | Jahresnutzen | ROI (12 Monate) |     Payback |
 | ------------ | -----------: | --------------: | ----------: |
-| Konservativ  |    2.160 EUR |            -40% | 20,0 Monate |
-| Realistisch  |    8.640 EUR |            140% |  5,0 Monate |
-| Ambitioniert |   16.200 EUR |            350% |  2,7 Monate |
+| Konservativ  |    2.160 EUR |            -45% | 22,0 Monate |
+| Realistisch  |    8.640 EUR |            118% |  5,5 Monate |
+| Ambitioniert |   16.200 EUR |            309% |  2,9 Monate |
 
 ### 7.3 Interpretation
 
-1. Im konservativen Szenario amortisiert sich der Prototyp innerhalb von 12 Monaten nicht vollstaendig.
-2. Im realistischen Szenario ist die Wirtschaftlichkeit klar positiv.
-3. Im ambitionierten Szenario ist der Nutzen sehr deutlich hoeher als die Entwicklungskosten.
-4. Aufgrund der starken nicht-monetaren Effekte ist bereits bei mittlerer Nutzung ein strategischer Mehrwert gegeben.
+Unter Beruecksichtigung der Gesamtkosten in Hoehe von 3.960 EUR und der realistischen monatlichen Kostenersparnis von 720 EUR konnte der Zeitpunkt der Amortisation berechnet werden. Das Projekt amortisiert sich nach etwa 5,5 Monaten.
+
+Zusammenfassend laesst sich feststellen, dass sowohl der monetaere als auch der nicht-monetaere Nutzen des CLI-Prototyps erheblich ist, da Kosten reduziert und gleichzeitig die Qualitaet und Effizienz der Softwareentwicklung verbessert werden.
+
+### 7.4 Amortisationstabelle (Realistisches Szenario, 720 EUR/Monat)
+
+| Monat | Monatlicher Nutzen | Kumulierter Nutzen | Offene Kosten |        Saldo |
+| ----: | -----------------: | -----------------: | ------------: | -----------: |
+|     0 |              0 EUR |              0 EUR |     3.960 EUR |   -3.960 EUR |
+|     1 |            720 EUR |            720 EUR |     3.960 EUR |   -3.240 EUR |
+|     2 |            720 EUR |          1.440 EUR |     3.960 EUR |   -2.520 EUR |
+|     3 |            720 EUR |          2.160 EUR |     3.960 EUR |   -1.800 EUR |
+|     4 |            720 EUR |          2.880 EUR |     3.960 EUR |   -1.080 EUR |
+|     5 |            720 EUR |          3.600 EUR |     3.960 EUR |     -360 EUR |
+|     6 |            720 EUR |          4.320 EUR |     3.960 EUR | **+360 EUR** |
+|     7 |            720 EUR |          5.040 EUR |     3.960 EUR |   +1.080 EUR |
+|     8 |            720 EUR |          5.760 EUR |     3.960 EUR |   +1.800 EUR |
+|    12 |            720 EUR |          8.640 EUR |     3.960 EUR |   +4.680 EUR |
+
+Break-even: zwischen Monat 5 und Monat 6 (exakt nach 5,5 Monaten).
 
 ## 8. Entscheidungsempfehlung
 
@@ -188,7 +218,7 @@ Zur Validierung der Planung sollten ab Go-Live monatlich folgende KPIs erhoben w
 
 ## 10. Kurzfazit
 
-Bei einem reinen Personalkostenprojekt mit 80 Stunden liegt der Kostenblock im Basisszenario bei 3.600 EUR.  
+Bei einem reinen Personalkostenprojekt mit 80 Stunden plus 4 Stunden Auftraggeber-Abstimmung liegt der Kostenblock im erweiterten Basisszenario bei 3.960 EUR.  
 Bereits bei realistischer Nutzung wird ein klar positiver monetarer Nutzen erzielt.  
 Zusammen mit den nicht-monetaren Effekten (Standardisierung, Qualitaet, Erweiterbarkeit) ist der Prototyp aus wirtschaftlicher und technischer Sicht nachvollziehbar begruendet.
 
